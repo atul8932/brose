@@ -18,30 +18,32 @@ if (
   console.error(
     "Missing essential environment variables. Please check your .env file."
   );
-  process.exit(1);
+  process.exit(1); // Exit the application if any critical environment variables are missing
 }
 
 const app = express();
 const port = process.env.PORT || 5000;
 
 // Middleware
-app.use(bodyParser.json());
-app.use(cors());
+app.use(bodyParser.json()); // Parse incoming requests with JSON payloads
+app.use(cors()); // Enable CORS for cross-origin requests
 
 // Import and use routes
 const stockRoutes = require("./routes/stocks"); // Stock-related routes
-const authRoutes = require("./routes/Auth"); // Authentication routes (ensure the path is lowercase)
-app.use("/api/stocks", stockRoutes);
-app.use("/api/auth", authRoutes); // Use authentication routes
+const authRoutes = require("./routes/auth"); // Authentication routes (ensure the path is lowercase)
 
-// Default route
+// Define API routes
+app.use("/api/stocks", stockRoutes); // Endpoint for stock operations
+app.use("/api/auth", authRoutes); // Endpoint for authentication
+
+// Default route for basic server check
 app.get("/", (req, res) => {
   res.send("API is working!");
 });
 
 // Catch-all route for undefined endpoints
 app.use((req, res) => {
-  res.status(404).send("API route not found");
+  res.status(404).send("API route not found"); // Handle invalid routes
 });
 
 // Error handling middleware
@@ -58,12 +60,12 @@ app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
 });
 
-// Sync all defined models to the DB
+// Sync all defined models to the DB and establish a database connection
 sequelize
-  .authenticate() // Check database connection
+  .authenticate() // Check the database connection
   .then(() => {
     console.log("Database connected successfully.");
-    return sequelize.sync({ alter: true }); // Use `alter: true` with caution in production
+    return sequelize.sync(); // Sync all models (use `alter` carefully in production)
   })
   .then(() => {
     console.log("All models were synchronized successfully.");
@@ -73,4 +75,5 @@ sequelize
       "Failed to synchronize models or connect to the database:",
       err
     );
+    process.exit(1); // Exit the application if database connection fails
   });

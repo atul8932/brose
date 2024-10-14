@@ -8,27 +8,19 @@ import {
   Image,
   Alert,
 } from "react-native";
-import axios from "axios";
 
 const LoginScreen = ({ setIsLoggedIn, navigation }) => {
-  const [identifier, setIdentifier] = useState(""); // Email or Phone
+  const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
 
-  const handleLogin = async () => {
-    try {
-      const response = await axios.post(
-        "http://192.168.1.6:5000/api/auth/login",
-        {
-          identifier, // Use identifier instead of emailOrPhone
-          password,
-        }
-      );
+  const handleLogin = () => {
+    const fixedIdentifier = "test";
+    const fixedPassword = "PASSWORD";
 
-      if (response.data.token) {
-        setIsLoggedIn(true); // Set the login state to true
-        Alert.alert("Login Successful", "Welcome back!");
-      }
-    } catch (error) {
+    if (identifier === fixedIdentifier && password === fixedPassword) {
+      setIsLoggedIn(true);
+      Alert.alert("Login Successful");
+    } else {
       Alert.alert("Invalid login credentials. Please try again.");
     }
   };
@@ -63,6 +55,15 @@ const LoginScreen = ({ setIsLoggedIn, navigation }) => {
       >
         <Text style={styles.signupButtonText}>Sign Up</Text>
       </TouchableOpacity>
+
+      {/* Display Login Details */}
+      <View style={styles.infoBox}>
+        <Text style={styles.infoText}>
+          Use the following credentials to log in:
+        </Text>
+        <Text style={styles.credentialsText}>ID: test</Text>
+        <Text style={styles.credentialsText}>Password: PASSWORD</Text>
+      </View>
     </View>
   );
 };
@@ -122,6 +123,24 @@ const styles = StyleSheet.create({
     color: "#3b5998",
     fontSize: 18,
     fontWeight: "bold",
+  },
+  infoBox: {
+    backgroundColor: "#f0f0f0",
+    padding: 15,
+    borderRadius: 8,
+    marginTop: 30,
+    width: "90%",
+    alignItems: "center",
+  },
+  infoText: {
+    color: "#333",
+    fontSize: 16,
+    marginBottom: 5,
+  },
+  credentialsText: {
+    color: "#3b5998",
+    fontWeight: "bold",
+    fontSize: 16,
   },
 });
 

@@ -2,7 +2,7 @@ import axios from "axios";
 
 // Create an instance of axios with default options
 const api = axios.create({
-  baseURL: "http://192.168.1.6:5000", // Use environment variable if available, e.g., process.env.API_BASE_URL
+  baseURL: "http://192.168.1.7:5000", // Use environment variable if available, e.g., process.env.API_BASE_URL
   timeout: 5000, // Timeout after 5 seconds, adjust as needed
 });
 

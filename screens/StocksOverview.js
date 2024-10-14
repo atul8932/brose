@@ -10,52 +10,32 @@ import {
 } from "react-native";
 import { List, Card } from "react-native-paper";
 import { LineChart } from "react-native-chart-kit";
-import axios from "axios";
 import Icon from "react-native-vector-icons/MaterialIcons";
+import stockData from "../stocks.json"; // Import the local JSON data
 
 const screenWidth = Dimensions.get("window").width;
 
 const StocksOverview = ({ navigation }) => {
   const [expanded, setExpanded] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const [stocks, setStocks] = useState([]);
-  const [filteredStocks, setFilteredStocks] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-
-  useEffect(() => {
-    const fetchStocks = async () => {
-      try {
-        const response = await axios.get("http://192.168.1.6:5000/api/stocks");
-        setStocks(response.data);
-        setFilteredStocks(response.data);
-        setLoading(false);
-      } catch (error) {
-        console.error("Error fetching stocks:", error);
-        setError("Failed to fetch stocks");
-        setLoading(false);
-      }
-    };
-
-    fetchStocks();
-  }, []);
+  const [filteredStocks, setFilteredStocks] = useState(stockData); // Set the initial stocks from the local JSON data
 
   const handleSearch = (query) => {
     setSearchQuery(query);
 
     if (query.length >= 2) {
-      const filtered = stocks.filter((stock) =>
+      const filtered = stockData.filter((stock) =>
         stock.stockName.toLowerCase().includes(query.toLowerCase())
       );
       setFilteredStocks(filtered);
     } else {
-      setFilteredStocks(stocks);
+      setFilteredStocks(stockData);
     }
   };
 
   const clearSearch = () => {
     setSearchQuery("");
-    setFilteredStocks(stocks);
+    setFilteredStocks(stockData);
   };
 
   const highlightText = (text, highlight) => {
@@ -76,22 +56,6 @@ const StocksOverview = ({ navigation }) => {
   const handlePress = (index) => {
     setExpanded(expanded === index ? null : index);
   };
-
-  if (loading) {
-    return (
-      <View style={styles.loadingContainer}>
-        <Text>Loading stocks...</Text>
-      </View>
-    );
-  }
-
-  if (error) {
-    return (
-      <View style={styles.errorContainer}>
-        <Text>{error}</Text>
-      </View>
-    );
-  }
 
   return (
     <ScrollView style={styles.container}>
@@ -126,7 +90,7 @@ const StocksOverview = ({ navigation }) => {
                   datasets: [
                     {
                       data: [
-                        stock.priceRecommended,
+                        stock.currentPrice,
                         stock.firstTargetPrice,
                         stock.secondTargetPrice,
                         stock.thirdTargetPrice,
@@ -152,11 +116,10 @@ const StocksOverview = ({ navigation }) => {
                 style={styles.chart}
               />
 
-              {/* Pass the stockId to the StockDetail component */}
               <TouchableOpacity
                 style={styles.detailButton}
-                onPress={() =>
-                  navigation.navigate("StockDetail", { stockId: stock.id })
+                onPress={
+                  () => navigation.navigate("StockDetail", { stock }) // Pass the stock data directly
                 }
               >
                 <Text style={styles.detailButtonText}>View Full Details</Text>
@@ -230,17 +193,6 @@ const styles = StyleSheet.create({
   highlightedText: {
     backgroundColor: "skyblue",
     fontWeight: "bold",
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  errorContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    padding: 20,
   },
 });
 

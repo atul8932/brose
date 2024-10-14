@@ -1,27 +1,19 @@
-import React, { useState, useEffect, useRef } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  ActivityIndicator,
-  Animated, // Import Animated from React Native
-} from "react-native";
+import React from "react";
+import { View, Text, StyleSheet, ScrollView, Animated } from "react-native";
 import { Card } from "react-native-paper";
 import * as Progress from "react-native-progress"; // For circular progress
-import axios from "axios";
 import { Easing } from "react-native";
 
 // Reusable Circular Progress Component with animation
 const TargetProgress = ({ label, percentage }) => {
-  const animatedProgress = useRef(new Animated.Value(0)).current;
+  const animatedProgress = React.useRef(new Animated.Value(0)).current;
 
-  useEffect(() => {
+  React.useEffect(() => {
     Animated.timing(animatedProgress, {
       toValue: percentage / 100,
-      duration: 1500, // Longer duration for smoother animation
+      duration: 1500,
       easing: Easing.elastic(5), // Easing function for smoothness
-      useNativeDriver: false, // Don't use native driver for non-layout animations
+      useNativeDriver: false,
     }).start();
   }, [percentage]);
 
@@ -54,13 +46,13 @@ const AnimatedProgressCircle = ({ animatedValue, percentage }) => {
   return (
     <View style={styles.progressCircleContainer}>
       <AnimatedProgress
-        size={94} // Slightly smaller to fit between the two circles
+        size={94}
         progress={progressValue}
-        thickness={12} // Adjust the thickness to fit between the circles
+        thickness={12}
         borderWidth={0}
-        color={"blue"} // Progress color
+        color={"blue"}
         showsText={false}
-        strokeCap="round" // Rounded progress bar ends
+        strokeCap="round"
         style={styles.roundedProgress}
       />
       <View style={styles.innerCircle}>
@@ -71,45 +63,9 @@ const AnimatedProgressCircle = ({ animatedValue, percentage }) => {
 };
 
 const StockDetail = ({ route }) => {
-  const { stockId } = route.params; // Check the route params for stockId
-  const [stock, setStock] = useState(null); // State to hold stock data
-  const [loading, setLoading] = useState(true); // Loading state
+  const { stock } = route.params; // Use the stock data passed from navigation
 
-  useEffect(() => {
-    // Fetch stock data from the API
-    const fetchStockData = async () => {
-      try {
-        const response = await axios.get(
-          `http://192.168.1.6:5000/api/stocks/${stockId}` // Corrected endpoint
-        );
-        setStock(response.data); // Set the stock data
-        setLoading(false); // Stop loading
-      } catch (error) {
-        setLoading(false); // Stop loading on error
-      }
-    };
-
-    fetchStockData();
-  }, [stockId]);
-
-  if (loading) {
-    return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#3b5998" />
-        <Text>Loading</Text>
-      </View>
-    );
-  }
-
-  if (!stock) {
-    return (
-      <View style={styles.loadingContainer}>
-        <Text>Stock data not available.</Text>
-      </View>
-    );
-  }
-
-  const initialPrice = stock.priceRecommended;
+  const initialPrice = stock.currentPrice;
   const firstTargetPercentage =
     ((stock.firstTargetPrice - initialPrice) / initialPrice) * 100;
   const secondTargetPercentage =
@@ -145,11 +101,11 @@ const StockDetail = ({ route }) => {
             <View style={styles.row}>
               <View style={styles.cell}>
                 <Text style={styles.cellTitle}>Recommended Price</Text>
-                <Text style={styles.cellValue}>₹{stock.priceRecommended}</Text>
+                <Text style={styles.cellValue}>₹{stock.currentPrice}</Text>
               </View>
               <View style={styles.cell}>
                 <Text style={styles.cellTitle}>Target Meet Date</Text>
-                <Text style={styles.cellValue}>{stock.targetMeetAt}</Text>
+                <Text style={styles.cellValue}>{stock.expectedTargetDate}</Text>
               </View>
             </View>
 
@@ -157,11 +113,11 @@ const StockDetail = ({ route }) => {
             <View style={styles.row}>
               <View style={styles.cell}>
                 <Text style={styles.cellTitle}>Stock Sector</Text>
-                <Text style={styles.cellValue}>{stock.stockSector}</Text>
+                <Text style={styles.cellValue}>{stock.sector}</Text>
               </View>
               <View style={styles.cell}>
-                <Text style={styles.cellTitle}>Stock Type</Text>
-                <Text style={styles.cellValue}>{stock.stockType}</Text>
+                <Text style={styles.cellTitle}>Company Size</Text>
+                <Text style={styles.cellValue}>{stock.companySize}</Text>
               </View>
             </View>
 
@@ -170,7 +126,7 @@ const StockDetail = ({ route }) => {
               <View style={styles.cell}>
                 <Text style={styles.cellTitle}>Volume</Text>
                 <Text style={styles.cellValue}>
-                  {stock.volume.toLocaleString()}
+                  {stock.sharesOutstanding.toLocaleString()}
                 </Text>
               </View>
               <View style={styles.cell}>
@@ -183,7 +139,7 @@ const StockDetail = ({ route }) => {
             <View style={styles.row}>
               <View style={styles.cell}>
                 <Text style={styles.cellTitle}>P/E Ratio</Text>
-                <Text style={styles.cellValue}>{stock.peRatio}</Text>
+                <Text style={styles.cellValue}>{stock.PEratio}</Text>
               </View>
               <View style={styles.cell}>
                 <Text style={styles.cellTitle}>Dividend Yield</Text>
@@ -209,7 +165,7 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     color: "#fff",
     marginBottom: 10,
-    textAlign: "center", // Center the title text
+    textAlign: "center",
   },
   card: {
     marginBottom: 20,
@@ -218,8 +174,8 @@ const styles = StyleSheet.create({
     backgroundColor: "#3b5998",
     shadowColor: "black",
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2, // Reduced shadow opacity
-    shadowRadius: 8, // Reduced shadow radius
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
   },
   cardContent: {
     padding: 20,
@@ -274,7 +230,7 @@ const styles = StyleSheet.create({
     borderRadius: 50,
   },
   tableContainer: {
-    marginTop: 20, // Add margin to separate from progress circles
+    marginTop: 20,
   },
   row: {
     flexDirection: "row",
@@ -286,10 +242,10 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: "#3b5998",
     borderRadius: 6,
-    marginHorizontal: 4, // Add space between cells
-    borderWidth: 1, // Reduced border width for a cleaner look
-    borderColor: "#9bc7a7", // Set the border color (you can customize this color)
-    padding: 8, // Added padding for better cell content layout
+    marginHorizontal: 4,
+    borderWidth: 1,
+    borderColor: "#9bc7a7",
+    padding: 8,
   },
   cellTitle: {
     color: "#fff",
@@ -298,11 +254,6 @@ const styles = StyleSheet.create({
   cellValue: {
     color: "#fff",
     fontWeight: "bold",
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
   },
 });
 
